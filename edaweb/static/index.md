@@ -6,10 +6,6 @@ site now also avaliable under the domain [boymoder.blog](https://boymoder.blog)!
 my name is eden and im a 23yo (boymoder/[fujoshi](https://www.urbandictionary.com/define.php?term=fujoshi)) computer science/robotics PhD student. i made my own website to encourage others to do so too.
 i'll post my thoughts on here sometimes, and use this site to link to other stuff i host [more about me](/thought?id=2).
 
-[click here for a random image of lio fotia](/random?tags=lio_fotia)
-
-[click here for a random KawoShin image](/random?tags=nagisa_kaworu+ikari_shinji+yaoi)
-
 ## FOSS alternative services
 
 - [nextcloud - dropbox (+ much more!) alternative](https://nc.eda.gay)

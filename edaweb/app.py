@@ -214,26 +214,26 @@ def get_iso_cd():
             id_ = id_
         )
 
-@app.route("/random")
-def serve_random():
-    try:
-        tags = flask.request.args['tags'].split(" ")
-    except KeyError:
-        flask.abort(400)
-    
-    sbi = services.get_random_image(tags)
-    req = urllib.request.Request(sbi.imurl)
-    mediaContent = urllib.request.urlopen(req).read()
-    with open(os.path.join(os.path.dirname(__file__), "static", "images", "random.jpg"), "wb") as f:
-        f.write(mediaContent)
-
-    with database.Database() as db:
-        return flask.render_template(
-            "random.html.j2",
-            **get_template_items("random image", db),
-            sbi = sbi,
-            localimg = "/img/random.jpg?seed=%i" % random.randint(0, 9999)
-        )
+#@app.route("/random")
+#def serve_random():
+#    try:
+#        tags = flask.request.args['tags'].split(" ")
+#    except KeyError:
+#        flask.abort(400)
+#    
+#    sbi = services.get_random_image(tags)
+#    req = urllib.request.Request(sbi.imurl)
+#    mediaContent = urllib.request.urlopen(req).read()
+#    with open(os.path.join(os.path.dirname(__file__), "static", "images", "random.jpg"), "wb") as f:
+#        f.write(mediaContent)
+#
+#    with database.Database() as db:
+#        return flask.render_template(
+#            "random.html.j2",
+#            **get_template_items("random image", db),
+#            sbi = sbi,
+#            localimg = "/img/random.jpg?seed=%i" % random.randint(0, 9999)
+#        )
 
 @app.route("/questions")
 def serve_questions():
