@@ -251,6 +251,16 @@ def parse_tweet(tweet_url):
     return dt, replying_to, text, images
 
 def scrape_whispa(whispa_url, since = None):
+    def query_answer(answer_url, max_retries = 10):
+        for i in range(max_retries):
+            try:
+                return requests.get(answer_url)
+            except requests.exceptions.ConnectionError:
+                s = 5.05 * (i + 1)
+                print("Connection timed out, retrying in %.2fs" % s)
+                time.sleep(s)
+                continue
+
     # add a bit of wiggle room in case i don't answer the questions in order (i often do this)
     if since is None:
         stop_at = datetime.datetime(year = 2001, month = 8, day = 12)
@@ -279,8 +289,11 @@ def scrape_whispa(whispa_url, since = None):
                     continue
 
                 answer_url = "https://apiv4.whispa.sh/feedbacks/%s/children/public" % j["id"]
-                req = requests.get(answer_url)
-                firstanswer = req.json()["data"][0]
+                req = query_answer(answer_url)
+                try:
+                    firstanswer = req.json()["data"][0]
+                except IndexError:
+                    continue
                 dt = datetime.datetime.fromisoformat(firstanswer["createdAt"][:-1])
 
                 qna = {
@@ -294,6 +307,7 @@ def scrape_whispa(whispa_url, since = None):
                 }
                 print(qna)     
                 qnas.append(qna)
+                time.sleep(2.03)
                 if dt <= stop_at:
                     print("Met the threshold for oldest Q&A, so stopped looking.")
                     break
