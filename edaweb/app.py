@@ -79,6 +79,10 @@ def index():
 def robots():
     return flask.send_from_directory("static", "robots.txt")
 
+@app.route("/cow.txt")
+def moo():
+    return flask.send_from_directory("static", "cow.txt")
+
 @app.route("/services")
 def serve_services():
     with database.Database() as db:
