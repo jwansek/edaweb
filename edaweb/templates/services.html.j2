@@ -5,7 +5,7 @@
         <h2>docker</h2>
         <ul>
             {% for host, containers in docker["containers"].items() %}
-                <h4>{{ "%s - %s" % (host[0], host[1]) }}</h4>
+                <h4>{{ "%s - %s - %s" % (host[0], host[1], docker["uptimes"][host]) }}</h4>
                 <table>
                     {% for name, status, image in containers %}
                         <tr>

@@ -324,12 +324,24 @@ def get_docker_containers(host, ssh_key_path):
     ).run('docker ps -a -s --format "table {{.Names}};{{.Status}};{{.Image}}"', hide = True)
     return [line.split(";") for line in result.stdout.split("\n")[1:-1]]
 
+def get_uptimes(host, ssh_key_path):
+    return fabric.Connection(
+        host = host,
+        user = "root",
+        connect_kwargs = {
+            "key_filename": ssh_key_path,
+            "look_for_keys": False
+        }
+    ).run('uptime -p', hide = True).stdout.strip()
+
 def cache_all_docker_containers(ssh_key_path):
     containers = {}
     containers["containers"] = {}
+    containers["uptimes"] = {}
     for host, name in CONFIG["docker_hosts"].items():
-        print(host)
+        print(host, name)
         containers["containers"][(host, name)] = get_docker_containers(host, ssh_key_path)
+        containers["uptimes"][(host, name)] = get_uptimes(host, ssh_key_path)
 
     containers["cachetime"] = "Docker information last updated at %s" % str(datetime.datetime.now())
     with open("/tmp/docker-cache.json", "wb") as f:
@@ -402,8 +414,10 @@ def get_recent_commits(db, max_per_repo = 3):
     return sorted(out, key = lambda a: a["datetime"], reverse = True)
 
 if __name__ == "__main__":
-    print(scrape_whispa(CONFIG.get("qnas", "url")))
+    # print(scrape_whispa(CONFIG.get("qnas", "url")))
     # import database
+    print(cache_all_docker_containers(os.path.join(os.path.dirname(__file__), "..", "edaweb-docker.pem")))
+    print(get_all_docker_containers())
 
     # with database.Database() as db:
     #     print(json.dumps(get_recent_commits(db), indent=4))
