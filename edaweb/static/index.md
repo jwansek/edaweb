@@ -27,8 +27,6 @@ these sites are hosted on my [homelab system](https://wiki.eda.gay)
 - [boymoder.network](https://boymoder.network/) - website for boymoder awareness
 - [4chan.org/lgbt/](https://boards.4channel.org/lgbt/) - but dont blame me if u catch brainworms
 - [https://www.math.uni-bielefeld.de/~sillke/Twister/fun/elevator-fun90.html](https://www.math.uni-bielefeld.de/~sillke/Twister/fun/elevator-fun90.html) any website with a URL like this is gonna be good
-- [boymoder.moe](https://nyaomidev.github.io/boymoder.moe/)
-- [boymoders.com](https://boymoders.com)
 - [john.citrons.xyz](https://john.citrons.xyz/) - for the nice 'ads' featured at the bottom of my page
 
 

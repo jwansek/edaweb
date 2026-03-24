@@ -36,6 +36,8 @@ services:
             - db-network
         external_links:
             - mariadb:mysql
+        depends_on:
+            - edaweb
         restart: unless-stopped
 
     homelab-wiki:
