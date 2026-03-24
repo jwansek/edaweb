@@ -1,16 +1,16 @@
 {% extends "template.html.j2" %}
 {% block content %}
     <aside>
-        <a><i>{{ "%d days until FFS" % days_till_ffs.days }}</i></a>
+        <a><i>{{ "%d days since FFS" % days_since_ffs.days }}</i></a>
         <section id="recent_thoughts">
-            <h4>recent thoughts:</h4>
+            <h4>recent blog posts:</h4>
             <ul>
                 {% for id_, title in featured_thoughts %}
                     <li><a href="{{'/thought?id=%i' % id_}}">{{title}}</a></li>
                 {% endfor %}
             </ul>
         </section>
-        <img id="sidebar_img" alt="{{sidebar_img[0]}}" src="{{sidebar_img[1]}}">
+        {# <img id="sidebar_img" alt="{{sidebar_img[0]}}" src="{{sidebar_img[1]}}"> #}
     </aside>
     {{markdown|safe}}
     <section id="recent_commits">

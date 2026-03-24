@@ -1,6 +1,6 @@
 site now also avaliable under the domain [boymoder.blog](https://boymoder.blog)!
 
-![yaoi](/img/shun-hashimoto-mio-chibana.gif)
+<!-- ![yaoi](/img/shun-hashimoto-mio-chibana.gif) -->
 
 ## haiiiiiii
 my name is eden and im a 23yo (boymoder/[fujoshi](https://www.urbandictionary.com/define.php?term=fujoshi)) computer science/robotics PhD student. i made my own website to encourage others to do so too.

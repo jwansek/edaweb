@@ -27,6 +27,7 @@ def get_pfp_img(db:database.Database):
     if len(shown_images) == len(dbimg):
         shown_images = set()
     folder = set(dbimg).difference(shown_images)
+    print(folder)
     choice = random.choice(list(folder))
     shown_images.add(choice)
     return choice
@@ -68,7 +69,7 @@ def index():
             return flask.render_template(
                 "index.html.j2", 
                 **get_template_items("eden's site :3", db),
-                days_till_ffs = datetime.datetime(2025, 11, 8) - datetime.datetime.now(),
+                days_since_ffs = datetime.datetime.now() - datetime.datetime(2025, 11, 8),
                 markdown = parser.parse_text(f.read())[0],
                 featured_thoughts = db.get_featured_thoughts(),
                 commits = services.get_recent_commits(db)[:15],
