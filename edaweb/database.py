@@ -244,7 +244,27 @@ class Database:
         with self.__connection.cursor() as cursor:
             cursor.execute("SELECT * FROM qnas;")
             return sorted(cursor.fetchall(), key = operator.itemgetter(2), reverse = True)
+        
+    def get_qna(self, id_):
+        with self.__connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM `qnas` WHERE `curiouscat_id` = %s;", (id_, ))
+            qna = {"qna": list(cursor.fetchone())}
+            cursor.execute("SELECT `curiouscat_id` FROM `qnas` WHERE `timestamp` < %s ORDER BY `timestamp` DESC LIMIT 1;", (qna["qna"][2], ))
+            try:
+                qna["previous"] = cursor.fetchone()[0]
+            except TypeError:
+                qna["previous"] = None
+            cursor.execute("SELECT `curiouscat_id` FROM `qnas` WHERE `timestamp` > %s ORDER BY `timestamp` LIMIT 1;", (qna["qna"][2], ))
+            try:
+                qna["next"] = cursor.fetchone()[0]
+            except TypeError:
+                qna["next"] = None
 
+            return qna
+
+if __name__ == "__main__":
+    with Database() as db:
+        print(db.get_qna(1098140963))
 
     
 

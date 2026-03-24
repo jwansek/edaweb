@@ -17,7 +17,7 @@ import io
 
 app = flask.Flask(__name__)
 CONFIG = configparser.ConfigParser(interpolation = None)
-CONFIG.read(os.path.join(os.path.dirname(__file__), "edaweb.conf"))
+CONFIG.read(os.path.join(os.path.dirname(__file__), "..", "edaweb.conf"))
 shown_images = set()
 shown_sidebar_images = set()
 
@@ -27,7 +27,6 @@ def get_pfp_img(db:database.Database):
     if len(shown_images) == len(dbimg):
         shown_images = set()
     folder = set(dbimg).difference(shown_images)
-    print(folder)
     choice = random.choice(list(folder))
     shown_images.add(choice)
     return choice
@@ -248,6 +247,18 @@ def serve_questions():
             **get_template_items("questions and answers", db),
             qnas_link = CONFIG.get("qnas", "url"),
             qnas = db.get_qnas()
+        )
+    
+@app.route("/question")
+def serve_question():
+    with database.Database() as db:
+        question_id = flask.request.args.get("id", type=int)
+        qna = db.get_qna(question_id)
+        return flask.render_template(
+            "question.html.j2",
+            **get_template_items("question from %s" % qna["qna"][2], db),
+            qnas_link = CONFIG.get("qnas", "url"),
+            qna = qna
         )
 
 if __name__ == "__main__":

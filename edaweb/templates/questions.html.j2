@@ -3,11 +3,7 @@
     <h4><a href="{{ qnas_link }}">ask a question!</a></h4>
     <dl>
         {% for id_, link, dt, question, answer, host in qnas %}
-            {% if host == "curiouscat" %}
-                <dt class="qnaheader"><a href="{{ link }}">{{ dt.isoformat() }}</a> - {{ host }}</dt>
-            {% else %}
-                <dt class="qnaheader">{{ dt.isoformat() }} - {{ host }}</dt>
-            {% endif %}
+            <dt class="qnaheader" id="{{ id_ }}"><a href="question?id={{ id_ }}">{{ dt.isoformat() }}</a> - {{ host }}</dt>
             <dd>
                 <dt class="question"><p>{{ question }}</p></dt>
                 <dd class="answer"><p>{{ answer }}</p></dd>
