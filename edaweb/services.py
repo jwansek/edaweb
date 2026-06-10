@@ -20,6 +20,7 @@ import queue
 import json
 import time
 import os
+import re
 
 theLastId = 0
 config_path = os.path.join(os.path.dirname(__file__), "..", "edaweb.conf")
@@ -250,6 +251,30 @@ def parse_tweet(tweet_url):
 
     return dt, replying_to, text, images
 
+def parse_rsc_flight(payload: str):
+    chunks = {}
+    lines = payload.strip().split('\n')
+    
+    for line in lines:
+        if not line.strip():
+            continue
+        # Match ID:payload
+        match = re.match(r'^([\w$]+):(.*)$', line.strip())
+        if not match:
+            continue
+            
+        chunk_id, content = match.groups()
+        
+        try:
+            # Try to parse as JSON-like (handles most data chunks)
+            data = json.loads(content)
+            chunks[chunk_id] = data
+        except json.JSONDecodeError:
+            # Keep raw for complex chunks (I[...], $ references, etc.)
+            chunks[chunk_id] = content
+    
+    return chunks
+
 def scrape_whispa(whispa_url, since = None):
     def query_answer(answer_url, max_retries = 10):
         for i in range(max_retries):
@@ -280,37 +305,39 @@ def scrape_whispa(whispa_url, since = None):
         js = str(script.text)
         if "receivedFeedback" in js:
             # my god this is horrible...
-            parsed_json = json.loads(json.loads(js[19:-1])[1][2:])[0][3]["loadedUser"]["receivedFeedback"]
-            # print(json.dumps(parsed_json, indent = 4))
-            # with open("whispas_%i.json" % i, "w") as f:
-            #     json.dump(parsed_json, f, indent = 4)
-            for j in parsed_json:
-                if j["_count"]["childFeedback"] < 0:
-                    continue
+            j = parse_rsc_flight(json.loads(js[19:-1])[1])
+            for j, v in j.items():
+                if type(v) is not str:
+                    parsed_json = v[0][3]["loadedUser"]["receivedFeedback"]
 
-                answer_url = "https://apiv4.whispa.sh/feedbacks/%s/children/public" % j["id"]
-                req = query_answer(answer_url)
-                try:
-                    firstanswer = req.json()["data"][0]
-                except IndexError:
-                    continue
-                dt = datetime.datetime.fromisoformat(firstanswer["createdAt"][:-1])
+                    for j in parsed_json:
+                        if j["_count"]["childFeedback"] < 0:
+                            continue
 
-                qna = {
-                    # "id": int(j["id"], base = 16),
-                    "id": int(dt.timestamp()),
-                    "link": answer_url,
-                    "datetime": dt,
-                    "question": j["content"],
-                    "answer": firstanswer["content"],
-                    "host": "whispa.sh"
-                }
-                print(qna)     
-                qnas.append(qna)
-                time.sleep(2.03)
-                if dt <= stop_at:
-                    print("Met the threshold for oldest Q&A, so stopped looking.")
-                    break
+                        answer_url = "https://apiv7.whispa.sh/feedbacks/%s/children/public" % j["id"]
+                        print(answer_url)
+                        req = query_answer(answer_url)
+                        try:
+                            firstanswer = req.json()["data"][0]
+                        except IndexError:
+                            continue
+                        dt = datetime.datetime.fromisoformat(firstanswer["createdAt"][:-1])
+
+                        qna = {
+                            # "id": int(j["id"], base = 16),
+                            "id": int(dt.timestamp()),
+                            "link": answer_url,
+                            "datetime": dt,
+                            "question": j["content"],
+                            "answer": firstanswer["content"],
+                            "host": "whispa.sh"
+                        }
+                        print(qna)     
+                        qnas.append(qna)
+                        time.sleep(2.03)
+                        if dt <= stop_at:
+                            print("Met the threshold for oldest Q&A, so stopped looking.")
+                            break
     return qnas
 
 def get_docker_containers(host, ssh_key_path):
@@ -414,10 +441,10 @@ def get_recent_commits(db, max_per_repo = 3):
     return sorted(out, key = lambda a: a["datetime"], reverse = True)
 
 if __name__ == "__main__":
-    # print(scrape_whispa(CONFIG.get("qnas", "url")))
-    # import database
-    print(cache_all_docker_containers(os.path.join(os.path.dirname(__file__), "..", "edaweb-docker.pem")))
-    print(get_all_docker_containers())
+    print(scrape_whispa(CONFIG.get("qnas", "url")))
+    # # import database
+    # print(cache_all_docker_containers(os.path.join(os.path.dirname(__file__), "..", "edaweb-docker.pem")))
+    # print(get_all_docker_containers())
 
     # with database.Database() as db:
     #     print(json.dumps(get_recent_commits(db), indent=4))
