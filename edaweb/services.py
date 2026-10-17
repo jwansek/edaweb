@@ -293,51 +293,37 @@ def scrape_whispa(whispa_url, since = None):
         stop_at = since - datetime.timedelta(days = 14)
         print("The newest Q&A timestamp in the database was %s, we will stop looking at %s." % (since.astimezone().isoformat(), stop_at.astimezone().isoformat()))
 
-    html_ = requests.get(whispa_url).content.decode()
-    # with open("temp.html", "w") as f:
-    #     f.write(html_)
+    whispa_url = "https://apiv7.whispa.sh/v2/users/public-profile/blogmoderology/feed?limit=50"
+    json_ = requests.get(whispa_url).json()
 
-    tree = html.fromstring(html_)
     qnas = []
-    # we're not doing proper HTML scraping here really... since the site uses client side rendering
-    # we rather parse the JS scripts to get the JSON payload of useful information... sadly this looks horrible
-    for i, script in enumerate(tree.xpath("/html/body/script"), 0):
-        js = str(script.text)
-        if "receivedFeedback" in js:
-            # my god this is horrible...
-            j = parse_rsc_flight(json.loads(js[19:-1])[1])
-            for j, v in j.items():
-                if type(v) is not str:
-                    parsed_json = v[0][3]["loadedUser"]["receivedFeedback"]
 
-                    for j in parsed_json:
-                        if j["_count"]["childFeedback"] < 0:
-                            continue
+    for j in json_["data"]:
+        dt = datetime.datetime.fromisoformat(j["createdAt"][:-1])
+        answer_url = "https://apiv7.whispa.sh/feedbacks/%s/children/public" % j["id"]
 
-                        answer_url = "https://apiv7.whispa.sh/feedbacks/%s/children/public" % j["id"]
-                        print(answer_url)
-                        req = query_answer(answer_url)
-                        try:
-                            firstanswer = req.json()["data"][0]
-                        except IndexError:
-                            continue
-                        dt = datetime.datetime.fromisoformat(firstanswer["createdAt"][:-1])
+        try:
+            firstanswer_j = requests.get(answer_url).json()["data"][0]
+        except IndexError:
+            continue
+        
+        qna = {
+            # "id": int(j["id"], base = 16),
+            "id": int(dt.timestamp()),
+            "link": answer_url,
+            "datetime": dt,
+            "question": j["content"],
+            "host": "whispa.sh",
+            "answer": firstanswer_j["content"],
+        }
+        print(qna)
+        qnas.append(qna)
+        time.sleep(2.03)
 
-                        qna = {
-                            # "id": int(j["id"], base = 16),
-                            "id": int(dt.timestamp()),
-                            "link": answer_url,
-                            "datetime": dt,
-                            "question": j["content"],
-                            "answer": firstanswer["content"],
-                            "host": "whispa.sh"
-                        }
-                        print(qna)     
-                        qnas.append(qna)
-                        time.sleep(2.03)
-                        if dt <= stop_at:
-                            print("Met the threshold for oldest Q&A, so stopped looking.")
-                            break
+        if dt <= stop_at:
+            print("Met the threshold for oldest Q&A, so stopped looking.")
+            break
+
     return qnas
 
 def get_docker_containers(host, ssh_key_path):
